@@ -25,12 +25,24 @@ class App extends Component {
     })
   }
 
-  nameChangeHandler = (event) => {
+  nameChangeHandler = (event, id) => {
+    const personIndex = this.state.persons.findIndex(p => {
+      return p.id == id;
+    }); // get person index if it's exist in the state
+    const person = [...this.state.persons[personIndex]];
+    
+    person.name = event.target.value;
+
+    // Update state by Index filter
+    const persons = [...this.state.persons];
+    persons[personIndex] = person;
+    this.setState({persons: persons});
+
     this.setState({
       persons: [
-        { name: 'Max', age: 38},
-        { name: event.target.value, age: 39},
-        { name: 'Stephanie', age: 36}
+        { id: '1', name: 'Max', age: 38},
+        { id: '2', name: event.target.value, age: 39},
+        { id: '3', name: 'Stephanie', age: 36}
       ]
     })
   }
@@ -38,6 +50,13 @@ class App extends Component {
   togglePersonHandler = () => {
     const doesShow = this.state.showPerson;
     this.setState({showPerson: !doesShow});
+  }
+
+  deletePersonHandler = (perIndex) => {
+    // const persons = this.state.persons; -- this approach is unsafe - it can damage the state
+    const persons = [...this.state.persons]; // SAFE: clone a new state for const persons
+    persons.splice(perIndex, 1);
+    this.setState({persons: persons});
   }
 
   render() {
@@ -56,6 +75,23 @@ class App extends Component {
       cursor: 'pointer'
     }
 
+    let persons = null;
+    // Render ST conditionally
+    if(this.state.showPerson){
+      persons=(
+        <div>
+          {/* Map: gives element and index, to scan each State element */}
+          {this.state.persons.map((person, index) => { // index: is not a safe method in case we delete element in the state stree
+            return <Person name={person.name} 
+              age={person.age} 
+              click={() => this.deletePersonHandler(person.id)}
+              key={person.id}
+              changed={(event) => this.nameChangeHandler(event, person.id)} /> // To handle the error function
+          })}
+        </div>
+      )
+    }
+
     return (
       <div className="App">
         <h1>Hi, Hello React</h1>
@@ -66,19 +102,7 @@ class App extends Component {
         <button
           style={style2}
           onClick={this.togglePersonHandler}>Switch Condition Handler</button>
-        {
-          this.state.showPerson === true ?
-        <div>
-          <Person name={this.state.persons[0].name} 
-            age={this.state.persons[0].age}/>
-          <Person name={this.state.persons[1].name}
-            age={this.state.persons[1].age}
-            click={this.switchNameHandler.bind(this, 'Max!')}
-            changed={this.nameChangeHandler}>My hobbies: Racing</Person>
-          <Person name={this.state.persons[2].name} 
-            age={this.state.persons[2].age}/>
-        </div> : null
-        }
+        {persons}
       </div>
     );
   }
