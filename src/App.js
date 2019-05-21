@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Person from './Person/Person';
+import ErrorBoundary from './ErrorBoundary/ErrorBoundary';
 
 class App extends Component {
   state = {
@@ -82,11 +83,14 @@ class App extends Component {
         <div>
           {/* Map: gives element and index, to scan each State element */}
           {this.state.persons.map((person, index) => { // index: is not a safe method in case we delete element in the state stree
-            return <Person name={person.name} 
+            return 
+            <ErrorBoundary key={person.id}>
+            <Person name={person.name} 
               age={person.age} 
               click={() => this.deletePersonHandler(person.id)}
               key={person.id}
               changed={(event) => this.nameChangeHandler(event, person.id)} /> // To handle the error function
+            </ErrorBoundary>
           })}
         </div>
       )
